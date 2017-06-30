@@ -70,6 +70,8 @@ export class HomePage {
 
   addChecklist(): void {
 
+    console.log("click add checklist!");
+
     let alert = this.alertCtrl.create({
       title: 'New Checklist',
       message: 'Enter the new name of this checklist below:',
@@ -116,7 +118,7 @@ export class HomePage {
       inputs: [
         {
           name: 'listName',
-          placeholder: 'New list name'
+          placeholder: 'New list name.'
         }
       ],
       buttons: [
