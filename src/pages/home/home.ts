@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, AlertController, Platform } from 'ionic-angular';
-import { ChecklistModel } from '../../models/checklist-model'
-import { DataProvider } from '../../providers/data/data'
-import { Keyboard } from '@ionic-native/keyboard'
+import {IonicPage, NavController, AlertController, Platform, ModalController} from 'ionic-angular';
+import { ChecklistModel } from '../../models/checklist-model';
+import { DataProvider } from '../../providers/data/data';
+import { Keyboard } from '@ionic-native/keyboard';
 import { ItemSliding } from 'ionic-angular';
+import { Dialogs } from '@ionic-native/dialogs';
+import {AuthenticatePage} from "../authenticate/authenticate";
 
 @IonicPage()
 @Component({
@@ -13,17 +15,23 @@ import { ItemSliding } from 'ionic-angular';
 export class HomePage {
 
   checklists: ChecklistModel[] = [];
+  isCordovaPlatform:boolean = false;
 
   constructor(public navCtrl: NavController,
               public dataService:DataProvider,
               public alertCtrl: AlertController,
               public platform: Platform,
-              public keyboard: Keyboard ){
-
+              public keyboard: Keyboard,
+              public dialog: Dialogs,
+              public modalCtrl: ModalController){
+    //console.log( platform.platforms() );
+    if (platform.is('core')) {
+      this.isCordovaPlatform = true;
+    }
 
   }
 
-  ionViewDidLoad() {
+  ionViewDidLoad(){
 
     this.platform.ready().then( ()=> {
 
@@ -72,86 +80,130 @@ export class HomePage {
 
     console.log("click add checklist!");
 
-    let alert = this.alertCtrl.create({
-      title: 'New Checklist',
-      message: 'Enter the new name of this checklist below:',
-      inputs: [
-        {
-          name: 'listName',
-          placeholder: 'List Name'
-        }
-      ],
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel',
-          handler: () => {
-            console.log('Cancel clicked');
-          }
-        },
-        {
-          text: 'Save',
-          handler: (data) => {
-            console.log( data.listName );
-            let newChecklist = new ChecklistModel(data.listName, []);
-            this.checklists.push(newChecklist);
+    if (this.isCordovaPlatform) {
 
-            newChecklist.checklistUpdates().subscribe( update => {
+      let alert = this.alertCtrl.create({
+        title: 'New Checklist',
+        message: 'Enter the new name of this checklist below:',
+        inputs: [
+          {
+            name: 'listName',
+            placeholder: 'List Name'
+          }
+        ],
+        buttons: [
+          {
+            text: 'Cancel',
+            role: 'cancel',
+            handler: () => {
+              console.log('Cancel clicked');
+            }
+          },
+          {
+            text: 'Save',
+            handler: (data) => {
+              console.log( data.listName );
+              let newChecklist = new ChecklistModel(data.listName, []);
+              this.checklists.push(newChecklist);
+
+              newChecklist.checklistUpdates().subscribe( update => {
+
+                this.save();
+              });
 
               this.save();
-            });
+              console.log( this.checklists );
+            }
+          }
+        ]
+      });
+      alert.present();
+
+    } else {
+
+      this.dialog.prompt('Enter the new name of this checklist below:', 'New Checklist', ["Save","Cancel"]).then( (params)=> {
+
+        if( params.buttonIndex==1 && params.input1.length ) {
+          let newChecklist = new ChecklistModel(params.input1, []);
+          this.checklists.push(newChecklist);
+
+          newChecklist.checklistUpdates().subscribe( update => {
 
             this.save();
-            console.log( this.checklists );
-          }
+          });
         }
-      ]
-    });
-    alert.present();
+
+      }).catch(e => console.log('Error displaying dialog', e));
+    }
+
   }
 
   renameChecklist( checklist:ChecklistModel, slidingItem: ItemSliding ): void {
 
-    let alert = this.alertCtrl.create({
-      title: 'Rename Checklist',
-      message: 'Enter the new name of this checklist below:',
-      inputs: [
-        {
-          name: 'listName',
-          placeholder: 'New list name.'
-        }
-      ],
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel',
-          handler: () => {
+    if (this.isCordovaPlatform) {
 
-            console.log('Cancel clicked');
-            slidingItem.close();
+      let alert = this.alertCtrl.create({
+        title: 'Rename Checklist',
+        message: 'Enter the new name of this checklist below:',
+        inputs: [
+          {
+            name: 'listName',
+            placeholder: 'New list name.'
           }
-        },
-        {
-          text: 'Save',
-          handler: (data) => {
+        ],
+        buttons: [
+          {
+            text: 'Cancel',
+            role: 'cancel',
+            handler: () => {
 
-            if( data.listName.length ) {
-
-              let index = this.checklists.indexOf(checklist);
-
-              if (index > -1) {
-
-                this.checklists[index].setTitle(data.listName);
-                this.save();
-              }
-
+              console.log('Cancel clicked');
               slidingItem.close();
             }
+          },
+          {
+            text: 'Save',
+            handler: (data) => {
+
+              if( data.listName.length ) {
+
+                let index = this.checklists.indexOf(checklist);
+
+                if (index > -1) {
+
+                  this.checklists[index].setTitle(data.listName);
+                  this.save();
+                }
+
+                slidingItem.close();
+              }
+            }
           }
+        ]
+      });
+      alert.present();
+
+    } else {
+
+      this.dialog.prompt('Enter the new name of this checklist below:', 'Rename Checklist', ["Save","Cancel"]).then( (params)=> {
+
+        if( params.buttonIndex==1 && params.input1.length ) {
+
+          let index = this.checklists.indexOf(checklist);
+
+          if (index > -1) {
+
+            this.checklists[index].setTitle(params.input1);
+            this.save();
+          }
+
+          slidingItem.close();
+
         }
-      ]
-    });
-    alert.present();
+      }).catch(e => console.log('Error displaying dialog', e));
+    }
+
+
   }
 
   viewChecklist( checklist ): void {
@@ -178,6 +230,13 @@ export class HomePage {
 
     this.keyboard.close();
     this.dataService.save( this.checklists );
+
+  }
+
+  openUserPage(): void {
+
+    let modal = this.modalCtrl.create('AuthenticatePage', { userId: 8675309 });
+    modal.present();
 
   }
 

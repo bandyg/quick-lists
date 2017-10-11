@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import {IonicPage, NavController, NavParams, AlertController, ItemSliding} from 'ionic-angular';
 import {ChecklistModel} from "../../models/checklist-model";
+import { Dialogs } from '@ionic-native/dialogs';
 
 /**
  * Generated class for the ChecklistPage page.
@@ -19,7 +20,8 @@ export class ChecklistPage {
 
   constructor( public navCtrl: NavController,
                public navParams: NavParams,
-               public alertCtrl: AlertController) {
+               public alertCtrl: AlertController,
+               public dialog: Dialogs ) {
 
     this.checklist = this.navParams.get( 'checklist' );
 
@@ -31,7 +33,7 @@ export class ChecklistPage {
 
   addItem( ): void {
 
-    let alert = this.alertCtrl.create({
+    /*let alert = this.alertCtrl.create({
       title: 'Add Item',
       message: 'Enter the new name of task for this checklist below:',
       inputs: [
@@ -57,7 +59,12 @@ export class ChecklistPage {
         }
       ]
     });
-    alert.present();
+    alert.present();*/
+    this.dialog.prompt('Enter the new name of task for this checklist below:', 'Add Item', ["Save","Cancel"]).then( (params)=> {
+
+      this.checklist.addItem( params.input1 );
+
+    }).catch(e => console.log('Error displaying dialog', e));
 
 
   }
@@ -74,7 +81,7 @@ export class ChecklistPage {
 
   renameItem( item, slidingItem: ItemSliding ): void {
 
-    let alert = this.alertCtrl.create({
+    /*let alert = this.alertCtrl.create({
       title: 'Rename Item',
       message: 'Enter the new name of task for this checklist below:',
       inputs: [
@@ -104,7 +111,14 @@ export class ChecklistPage {
         }
       ]
     });
-    alert.present();
+    alert.present();*/
+
+    this.dialog.prompt('Enter the new name of task for this checklist below:', 'Rename Item', ["Save","Cancel"], item.title).then( (params)=> {
+
+      this.checklist.renameItem( item, params.input1 );
+      slidingItem.close();
+
+    }).catch(e => console.log('Error displaying dialog', e));
 
   }
 
@@ -144,7 +158,7 @@ export class ChecklistPage {
 
   changeItemNote( item, slidingItem: ItemSliding ): void {
 
-    let alert = this.alertCtrl.create({
+    /*let alert = this.alertCtrl.create({
       title: 'Item note',
       inputs: [
         {
@@ -172,7 +186,14 @@ export class ChecklistPage {
         }
       ]
     });
-    alert.present();
+    alert.present();*/
+
+    this.dialog.prompt('Enter note below:', 'Item note', ["Save","Cancel"], item.note).then( (params)=> {
+
+      this.checklist.setNote( item, params.input1 );
+      slidingItem.close();
+
+    }).catch(e => console.log('Error displaying dialog', e));
 
   }
 
