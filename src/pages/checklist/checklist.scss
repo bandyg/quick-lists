@@ -30,4 +30,18 @@ page-checklist {
     color: darkgrey;
   }
 
+  ion-item-sliding .item {
+    background-color: #51edc2;
+    border-bottom-left-radius: 10px;
+  }
+
+  ion-item-sliding {
+    background-color: #c9ed66 !important;
+  }
+
+  ion-checkbox .checkbox-icon {
+    border-color: #7ca7ff !important;
+    background-color: #58D2E8 !important;
+  }
+
 }

@@ -1,44 +1,52 @@
 <ion-header>
   <ion-navbar color="secondary">
-    <ion-buttons start>
+    <ion-buttons right>
       <button color="grey" ion-button icon-only (click)="cancelModal()">Cancel</button>
+    </ion-buttons>
+    <ion-buttons left [hidden]="currentModal != 'ForgetPassword'">
+      <button color="grey" ion-button icon-only (click)="currentModal = 'LogIn'">
+        <ion-icon name="md-arrow-round-back"></ion-icon>
+      </button>
     </ion-buttons>
   </ion-navbar>
 </ion-header>
 
 <ion-content class="user">
   <!-- log in -->
-  <div [hidden]="currentModal != 'LogIn'">
+  <div [hidden]="currentModal != 'LogIn'" [@fadeAnimation]="currentModal != 'LogIn'?'hide':'show'">
     <div padding-bottom></div>
     <h3 class="text-center">Log In</h3>
 
-    <form #logInForm="ngForm" (ngSubmit)="logInHandler(logInForm)">
+    <form [formGroup]="logInForm" (ngSubmit)="logInHandler(logInForm)">
       <ion-list>
         <!--ion-item>
           <ion-label primary>Phone</ion-label>
           <ion-input [(ngModel)]="logInModel.phone" name="phone" type="number" required ngModel pattern="[0-9]{11}"></ion-input>
         </ion-item-->
         <ion-item>
-        <ion-label primary>Email</ion-label>
-        <ion-input [(ngModel)]="logInModel.email" name="email" type="text" required minlength="3"></ion-input>
+          <ion-label primary>Email</ion-label>
+          <ion-input type="email" formControlName="email"></ion-input>
         </ion-item>
 
         <ion-item>
           <ion-label primary>Password</ion-label>
-          <ion-input [(ngModel)]="logInModel.password" name="password" type="password" required ngModel minlength="6"></ion-input>
+          <ion-input type="password" formControlName="password"></ion-input>
         </ion-item>
       </ion-list>
 
       <div class="session-bottom">
-        <button color="grey" ion-button dark clear small type="button" (click)="currentModal = 'ForgetPassword'">Forget Password?</button>
+        <button color="grey" ion-button dark clear small type="button" (click)="currentModal = 'ForgetPassword'">Forget
+          Password?
+        </button>
 
         <div class="pull-right">
-          <button color="grey" ion-button dark clear small (click)="currentModal = 'SignUp'" type="button">SignUp</button>
+          <button color="grey" ion-button dark clear small (click)="currentModal = 'SignUp'" type="button">SignUp
+          </button>
         </div>
       </div>
 
       <div padding-left padding-right>
-        <button color="grey" ion-button  block [disabled]="!logInForm.valid" type="submit">Log In</button>
+        <button color="grey" ion-button block [disabled]="!logInForm.valid" type="submit">Log In</button>
       </div>
 
       <!--div *ngIf="heyApp.authService.isWeChatBrowser()" padding-left padding-right>
@@ -53,58 +61,53 @@
 
 
   <!-- sign up -->
-  <div [hidden]="currentModal != 'SignUp'">
+  <div [hidden]="currentModal != 'SignUp'" [@fadeAnimation]="currentModal != 'SignUp'?'hide':'show'">
     <div padding-bottom></div>
     <h3 class="text-center">Sign Up</h3>
 
-    <form #signUpForm="ngForm" (ngSubmit)="signUpHandler(signUpForm)">
+    <form [formGroup]="signUpForm" (ngSubmit)="signUpHandler(signUpForm)">
       <ion-list>
 
         <ion-item>
           <ion-label primary>Firstname</ion-label>
-          <ion-input [(ngModel)]="signUpModel.firstName" name="firstName" type="text" required minlength="3"></ion-input>
+          <ion-input type="text" formControlName="firstName"></ion-input>
         </ion-item>
 
         <ion-item>
           <ion-label primary>Lastname</ion-label>
-          <ion-input [(ngModel)]="signUpModel.lastName" name="lastName" type="text" required minlength="3"></ion-input>
+          <ion-input type="text" formControlName="lastName"></ion-input>
         </ion-item>
 
         <ion-item>
           <ion-label primary>Email</ion-label>
-          <ion-input [(ngModel)]="signUpModel.email" name="email" type="text" required minlength="3"></ion-input>
+          <ion-input type="email" formControlName="email"></ion-input>
         </ion-item>
 
-        <!--ion-item>
-          <ion-label primary>Phone</ion-label>
-          <ion-input [(ngModel)]="signUpModel.phone" #phoneInput="ngModel" name="phone" type="number" required ngModel pattern="[0-9]{11}"></ion-input>
-        </ion-item>
-
-        <button (click)="getVerificationCode()" [disabled]="getVerificationCodeBtnDisabled || !phoneInput.valid" class="btn-getcode" color="light" ion-button small type="button">{{ getVerificationCodeBtnText }}</button>
         <ion-item>
-          <ion-label primary>Verification Code</ion-label>
-          <ion-input [(ngModel)]="signUpModel.verificationCode" name="verificationCode" type="number" required ngModel pattern="[0-9]{6}"></ion-input>
-        </ion-item-->
+          <ion-label primary>Phone</ion-label>
+          <ion-input type="number" formControlName="phone"></ion-input>
+        </ion-item>
 
         <ion-item>
           <ion-label primary>Password</ion-label>
-          <ion-input [(ngModel)]="signUpModel.password" name="password" type="password" required ngModel minlength="6"></ion-input>
+          <ion-input type="password" formControlName="password"></ion-input>
         </ion-item>
 
         <ion-item>
           <ion-label primary>confirmPassword</ion-label>
-          <ion-input [(ngModel)]="signUpModel.confirmPassword" name="confirmPassword" type="password" required ngModel minlength="6"></ion-input>
+          <ion-input type="password" formControlName="confirmPassword"></ion-input>
         </ion-item>
 
       </ion-list>
 
       <div class="session-bottom">
         <button (click)="openTermsPage()" color="grey" ion-button clear small type="button">
-         Agree User Agreement
+          Agree User Agreement
         </button>
 
         <div class="pull-right">
-          <button color="grey" ion-button dark clear small (click)="currentModal = 'LogIn'" type="button">Log In</button>
+          <button color="grey" ion-button dark clear small (click)="currentModal = 'LogIn'" type="button">Log In
+          </button>
         </div>
       </div>
 
@@ -122,15 +125,15 @@
     </form>
   </div>
   <!-- forget password -->
-  <div [hidden]="currentModal != 'ForgetPassword'">
+  <div [hidden]="currentModal != 'ForgetPassword'" [@fadeAnimation]="currentModal != 'ForgetPassword'?'hide':'show'">
     <div padding-bottom></div>
     <h3 class="text-center">Forget Password</h3>
 
-    <form #forgetPasswordForm="ngForm" (ngSubmit)="forgetPasswordHandler(forgetPasswordForm)">
+    <form [formGroup]="forgetPasswordForm" (ngSubmit)="forgetPasswordHandler(forgetPasswordForm)">
       <ion-list>
 
         <ion-item>
-          <ion-input placeholder="Your registered email address" [(ngModel)]="forgetPasswordModel.email" name="email" type="email" required minlength="3"></ion-input>
+          <ion-input placeholder="Your registered email address" type="email" formControlName="email"></ion-input>
         </ion-item>
 
       </ion-list>
@@ -147,5 +150,28 @@
         <button (click)="loginWithWeChatApp()" color="light" ion-button block>WeChat To Log In</button>
       </div-->
     </form>
+  </div>
+  <div [hidden]="currentModal != 'Authed'" [@fadeAnimation]="currentModal != 'Authed'?'hide':'show'">
+    <div padding-bottom></div>
+    <h3 class="text-center">User Actions</h3>
+
+    <div padding-left padding-right>
+      <button color="grey" ion-button block (click)="upload2Cloud()">
+        <ion-icon name="ios-cloud-upload-outline"> Upload</ion-icon>
+      </button>
+    </div>
+
+    <div padding-left padding-right>
+      <button color="grey" ion-button block (click)="download4Cloud()">
+        <ion-icon name="ios-cloud-download-outline"> Download</ion-icon>
+      </button>
+    </div>
+
+    <div padding-left padding-right>
+      <button color="grey" ion-button block (click)="logoutHandler()">
+        <ion-icon name="md-log-out"> Log out</ion-icon>
+      </button>
+    </div>
+
   </div>
 </ion-content>

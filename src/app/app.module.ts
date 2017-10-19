@@ -1,5 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { ErrorHandler, NgModule } from '@angular/core';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { IonicApp, IonicErrorHandler, IonicModule } from 'ionic-angular';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
@@ -11,7 +12,6 @@ import { Dialogs } from '@ionic-native/dialogs';
 import { BackandService } from '@backand/angular2-sdk';
 import { BAServiceProvider } from '../providers/auth-service/backand-service';
 import { UtilityProvider } from '../providers/utility/utility';
-import {WdAuthServiceProvider} from "../providers/auth-service/auth-service";
 import io from 'socket.io-client';
 window["io"] = io;
 
@@ -21,6 +21,7 @@ window["io"] = io;
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     IonicModule.forRoot(MyApp),
     IonicStorageModule.forRoot( )
   ],
@@ -37,8 +38,7 @@ window["io"] = io;
     Dialogs,
     BackandService,
     UtilityProvider,
-    BAServiceProvider,
-    WdAuthServiceProvider
+    BAServiceProvider
   ]
 })
 export class AppModule {}

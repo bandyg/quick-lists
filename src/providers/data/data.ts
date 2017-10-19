@@ -58,5 +58,9 @@ export class DataProvider {
     this.storage.set('checklists', '[{"title":"Sample","dateTime":1498634658451,"progress":"1/3","items":[{"title":"task1","checked":true,"note":"note1"},{"title":"task2","checked":false,"note":"note2"},{"title":"task3","checked":false,"note":"note3"}]}]');
   }
 
+  saveFromJSON(data:string) {
+
+    return this.storage.set('checklists', data);
+  }
 
 }

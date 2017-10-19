@@ -42,7 +42,7 @@ export class UtilityProvider {
   presentLoading() {
     this.loading = this.loadingCtrl.create({
       content: ('Please Wait ...'),
-      duration: 5000,
+      duration: 20000,
     });
 
     return this.loading.present();

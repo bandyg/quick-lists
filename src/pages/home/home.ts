@@ -1,11 +1,11 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import {IonicPage, NavController, AlertController, Platform, ModalController} from 'ionic-angular';
-import { ChecklistModel } from '../../models/checklist-model';
-import { DataProvider } from '../../providers/data/data';
-import { Keyboard } from '@ionic-native/keyboard';
-import { ItemSliding } from 'ionic-angular';
-import { Dialogs } from '@ionic-native/dialogs';
-import {AuthenticatePage} from "../authenticate/authenticate";
+import {ChecklistModel} from '../../models/checklist-model';
+import {DataProvider} from '../../providers/data/data';
+import {Keyboard} from '@ionic-native/keyboard';
+import {ItemSliding, Events} from 'ionic-angular';
+import {Dialogs} from '@ionic-native/dialogs';
+import {BAServiceProvider} from "../../providers/auth-service/backand-service";
 
 @IonicPage()
 @Component({
@@ -14,59 +14,67 @@ import {AuthenticatePage} from "../authenticate/authenticate";
 })
 export class HomePage {
 
-  checklists: ChecklistModel[] = [];
+  checklists:ChecklistModel[] = [];
   isCordovaPlatform:boolean = false;
+  userName:string = "";
 
-  constructor(public navCtrl: NavController,
+  constructor(public navCtrl:NavController,
               public dataService:DataProvider,
-              public alertCtrl: AlertController,
-              public platform: Platform,
-              public keyboard: Keyboard,
-              public dialog: Dialogs,
-              public modalCtrl: ModalController){
+              public alertCtrl:AlertController,
+              public platform:Platform,
+              public keyboard:Keyboard,
+              public dialog:Dialogs,
+              public modalCtrl:ModalController,
+              private events:Events,
+              public BAServ:BAServiceProvider) {
     //console.log( platform.platforms() );
     if (platform.is('core')) {
       this.isCordovaPlatform = true;
     }
 
+    if (this.BAServ.isAuth) {
+      this.setUserName();
+    }
+
+    this.registerEventsHandler();
   }
 
-  ionViewDidLoad(){
+  ionViewDidLoad() {
 
-    this.platform.ready().then( ()=> {
+    this.platform.ready().then(()=> {
 
-      this.dataService.getIntroFlag().then( result => {
+      this.dataService.getIntroFlag().then(result => {
 
-        console.log( "The IntroFlag: " + result );
-        if( !result ) {
+        console.log("The IntroFlag: " + result);
+        if (!result) {
 
-          this.dataService.setIntroFlag( true );
+          this.dataService.setIntroFlag(true);
           this.dataService.setSampleData();
           this.navCtrl.setRoot('IntroPage');
         }
       });
 
-      this.dataService.getData().then( result => {
+      this.dataService.getData().then(result => {
 
         let resultChecklists = null;
 
-        if( typeof(result) != 'undefined' ) {
+        if (typeof(result) != 'undefined') {
 
           resultChecklists = JSON.parse(result);
 
-          console.log( resultChecklists );
+          console.log(resultChecklists);
         }
 
-        if( resultChecklists != null ) {
+        if (resultChecklists != null) {
 
-          resultChecklists.forEach( checklist => {
+          resultChecklists.forEach(checklist => {
 
-            let loadChecklist = new ChecklistModel( checklist.title, checklist.items );
-            loadChecklist.setDateTime( checklist.dateTime );
-            loadChecklist.setProgress( checklist.progress );
+            let loadChecklist = new ChecklistModel(checklist.title, checklist.items);
+            loadChecklist.setDateTime(checklist.dateTime);
+            loadChecklist.setProgress(checklist.progress);
             this.checklists.push(loadChecklist);
 
-            loadChecklist.checklistUpdates().subscribe( update => this.save() )
+            loadChecklist.checklistUpdates().subscribe(update => this.save())
           })
         }
       });
@@ -76,7 +84,7 @@ export class HomePage {
 
   }
 
-  addChecklist(): void {
+  addChecklist():void {
 
     console.log("click add checklist!");
 
@@ -102,17 +110,17 @@ export class HomePage {
           {
             text: 'Save',
             handler: (data) => {
-              console.log( data.listName );
+              console.log(data.listName);
               let newChecklist = new ChecklistModel(data.listName, []);
               this.checklists.push(newChecklist);
 
-              newChecklist.checklistUpdates().subscribe( update => {
+              newChecklist.checklistUpdates().subscribe(update => {
 
                 this.save();
               });
 
               this.save();
-              console.log( this.checklists );
+              console.log(this.checklists);
             }
           }
         ]
@@ -121,16 +129,17 @@ export class HomePage {
 
     } else {
 
-      this.dialog.prompt('Enter the new name of this checklist below:', 'New Checklist', ["Save","Cancel"]).then( (params)=> {
+      this.dialog.prompt('Enter the new name of this checklist below:', 'New Checklist', ["Save", "Cancel"]).then((params)=> {
 
-        if( params.buttonIndex==1 && params.input1.length ) {
+        if (params.buttonIndex == 1 && params.input1.length) {
           let newChecklist = new ChecklistModel(params.input1, []);
           this.checklists.push(newChecklist);
 
-          newChecklist.checklistUpdates().subscribe( update => {
+          newChecklist.checklistUpdates().subscribe(update => {
 
             this.save();
           });
+          this.save();
         }
 
       }).catch(e => console.log('Error displaying dialog', e));
@@ -138,7 +147,7 @@ export class HomePage {
 
   }
 
-  renameChecklist( checklist:ChecklistModel, slidingItem: ItemSliding ): void {
+  renameChecklist(checklist:ChecklistModel, slidingItem:ItemSliding):void {
 
     if (this.isCordovaPlatform) {
 
@@ -165,7 +174,7 @@ export class HomePage {
             text: 'Save',
             handler: (data) => {
 
-              if( data.listName.length ) {
+              if (data.listName.length) {
 
                 let index = this.checklists.indexOf(checklist);
 
@@ -185,9 +194,9 @@ export class HomePage {
 
     } else {
 
-      this.dialog.prompt('Enter the new name of this checklist below:', 'Rename Checklist', ["Save","Cancel"]).then( (params)=> {
+      this.dialog.prompt('Enter the new name of this checklist below:', 'Rename Checklist', ["Save", "Cancel"]).then((params)=> {
 
-        if( params.buttonIndex==1 && params.input1.length ) {
+        if (params.buttonIndex == 1 && params.input1.length) {
 
           let index = this.checklists.indexOf(checklist);
 
@@ -206,37 +215,113 @@ export class HomePage {
 
   }
 
-  viewChecklist( checklist ): void {
+  viewChecklist(checklist):void {
 
-    this.navCtrl.push( 'ChecklistPage',
+    this.navCtrl.push('ChecklistPage',
       {
         'checklist': checklist
       }
     )
   }
 
-  removeChecklist( checklist ): void {
+  removeChecklist(checklist):void {
 
     let index = this.checklists.indexOf(checklist);
 
-    if( index > -1 ) {
+    if (index > -1) {
 
-      this.checklists.splice( index, 1 );
+      this.checklists.splice(index, 1);
       this.save();
     }
   }
 
-  save(): void {
+  save():void {
 
     this.keyboard.close();
-    this.dataService.save( this.checklists );
+    this.dataService.save(this.checklists);
 
   }
 
-  openUserPage(): void {
+  openUserPage():void {
 
-    let modal = this.modalCtrl.create('AuthenticatePage', { userId: 8675309 });
+    let modal = this.modalCtrl.create('AuthenticatePage');
     modal.present();
+
+  }
+
+  setUserName() {
+
+    this.userName = this.BAServ.userName;
+  }
+
+  registerEventsHandler() {
+
+    //#1
+    this.events.subscribe("auth:getUserDone", () => {
+      console.log("auth:getUserDone event comes");
+      this.setUserName();
+    });
+
+    //#2
+    this.events.subscribe("auth:userLogout", () => {
+      console.log("auth:userLogout event comes");
+      this.setUserName();
+    });
+
+    //#3
+    this.events.subscribe("auth:userLogin", () => {
+      console.log("auth:userLogin event comes");
+      this.setUserName();
+    });
+
+    //#4
+    this.events.subscribe("auth:download-suc", () => {
+      console.log("auth:download-suc event comes");
+      this.reloadChecklists();
+    });
+  }
+
+  unregisterEventsHandler() {
+    this.events.unsubscribe("auth:getUserDone");
+    this.events.unsubscribe("auth:userLogout");
+    this.events.unsubscribe("auth:userLogin");
+    this.events.unsubscribe("auth:download-suc");
+  }
+
+  ionViewWillUnload() {
+    console.log("view will unload");
+    this.unregisterEventsHandler();
+  }
+
+  reloadChecklists() {
+
+    this.dataService.getData()
+      .then(result => {
+
+        this.checklists = [];
+
+        let resultChecklists = null;
+
+        if (typeof(result) != 'undefined') {
+
+          resultChecklists = JSON.parse(result);
+
+          console.log(resultChecklists);
+        }
+
+        if (resultChecklists != null) {
+
+          resultChecklists.forEach(checklist => {
+
+            let loadChecklist = new ChecklistModel(checklist.title, checklist.items);
+            loadChecklist.setDateTime(checklist.dateTime);
+            loadChecklist.setProgress(checklist.progress);
+            this.checklists.push(loadChecklist);
+
+            loadChecklist.checklistUpdates().subscribe(update => this.save())
+          })
+        }
+      });
 
   }
 

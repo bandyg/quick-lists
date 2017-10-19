@@ -21,6 +21,11 @@ page-home {
 
   button.item {
     background-color: #58D2E8;
+    border-top-left-radius: 20px;
+  }
+
+  ion-item-sliding {
+    background-color: #e8ec9c !important;
   }
 
 }
