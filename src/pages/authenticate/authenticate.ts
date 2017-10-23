@@ -10,6 +10,7 @@ import {DataProvider} from '../../providers/data/data';
 @Component({
   selector: 'page-authenticate',
   templateUrl: 'authenticate.html',
+
   animations: [FadeAnimation]
 })
 export class AuthenticatePage {
@@ -336,6 +337,7 @@ export class AuthenticatePage {
 
   upload2Cloud() {
 
+    this.utilityComp.presentLoading();
     this.BAServ.getUserTodo()
       .then(data => {
 
@@ -352,7 +354,7 @@ export class AuthenticatePage {
 
             })
             .catch(err => {
-
+              this.utilityComp.dismissLoading();
               console.log(err);
             });
         } else {
@@ -363,6 +365,7 @@ export class AuthenticatePage {
         }
       })
       .catch(error => {
+        this.utilityComp.dismissLoading();
         console.info("db error", error);
       });
 
@@ -371,6 +374,7 @@ export class AuthenticatePage {
 
   download4Cloud() {
 
+    this.utilityComp.presentLoading();
     this.BAServ.getUserTodo()
       .then(data => {
 
@@ -378,11 +382,13 @@ export class AuthenticatePage {
         const userTodo = data.data[0];
         this.dataService.saveFromJSON(userTodo.todoItems).then( () => {
           this.events.publish("auth:download-suc");
+          this.utilityComp.dismissLoading();
           this.cancelModal();
         });
 
       })
       .catch(error => {
+        this.utilityComp.dismissLoading();
         console.info("db error", error);
       });
   }
@@ -470,6 +476,16 @@ export class AuthenticatePage {
       });
     });
 
+    //#8
+    this.events.subscribe("auth:uploadFinished", () => {
+      console.log("auth:uploadFinished event comes");
+      this.utilityComp.dismissLoading();
+/*      this.utilityComp.presentAlter({
+        title: ('Alter'),
+        subTitle: "upload finished",
+      });*/
+    });
+
   }
 
   unregisterEventsHandler() {
@@ -480,6 +496,7 @@ export class AuthenticatePage {
     this.events.unsubscribe("bas:signUp-err");
     this.events.unsubscribe("bas:resetPassword-suc");
     this.events.unsubscribe("bas:resetPassword-err");
+    this.events.unsubscribe("auth:uploadFinished");
 
   }
 
@@ -490,7 +507,7 @@ export class AuthenticatePage {
 
         this.BAServ.postUserTodo(itemId, data)
           .then(() => {
-
+            this.events.publish("auth:uploadFinished");
             this.cancelModal();
           });
       });

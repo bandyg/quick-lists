@@ -1,28 +1,34 @@
-import { Injectable } from '@angular/core';
-import { Events, ModalController, Loading, LoadingController, AlertController, ToastController, ActionSheetController } from 'ionic-angular';
+import {Injectable} from '@angular/core';
+import {
+  Events,
+  ModalController,
+  Loading,
+  LoadingController,
+  AlertController,
+  ToastController,
+  ActionSheetController
+} from 'ionic-angular';
 
 /*
-  Generated class for the UtilityProvider provider.
+ Generated class for the UtilityProvider provider.
 
-  See https://angular.io/docs/ts/latest/guide/dependency-injection.html
-  for more info on providers and Angular DI.
-*/
+ See https://angular.io/docs/ts/latest/guide/dependency-injection.html
+ for more info on providers and Angular DI.
+ */
 @Injectable()
 export class UtilityProvider {
 
   //
-  loading: Loading;
+  loading:Loading;
 
   //
   // constructor
-  constructor(
-    public events: Events,
-    public modalCtrl: ModalController,
-    public alertCtrl: AlertController,
-    public toastCtrl: ToastController,
-    public actionSheetCtrl: ActionSheetController,
-    public loadingCtrl: LoadingController
-  ) {
+  constructor(public events:Events,
+              public modalCtrl:ModalController,
+              public alertCtrl:AlertController,
+              public toastCtrl:ToastController,
+              public actionSheetCtrl:ActionSheetController,
+              public loadingCtrl:LoadingController) {
   }
 
 
@@ -39,9 +45,12 @@ export class UtilityProvider {
 
   //
   // present loading
-  presentLoading() {
+  presentLoading(loadingStr?:string) {
+    if (loadingStr == null) {
+      loadingStr = 'Please Wait ...';
+    }
     this.loading = this.loadingCtrl.create({
-      content: ('Please Wait ...'),
+      content: loadingStr,
       duration: 20000,
     });
 
@@ -129,7 +138,7 @@ export class UtilityProvider {
 
   //
   // present toast
-  presentToast(message: string, duration: number = 3000, position: string = 'top') {
+  presentToast(message:string, duration:number = 3000, position:string = 'top') {
     let toast = this.toastCtrl.create({
       message: message,
       duration: duration,
@@ -142,7 +151,7 @@ export class UtilityProvider {
 
   //
   // present action sheet
-  presentActionSheet(title = ('Operations'), btns: Object[] = []) {
+  presentActionSheet(title = ('Operations'), btns:Object[] = []) {
     let actionSheet = this.actionSheetCtrl.create({
       title: title,
       buttons: btns,
@@ -153,7 +162,7 @@ export class UtilityProvider {
 
   //
   // present modal
-  presentModal(page, params: Object = {}, callback?) {
+  presentModal(page, params:Object = {}, callback?) {
     let modal = this.modalCtrl.create(page, params);
 
     callback && modal.onDidDismiss(callback);
